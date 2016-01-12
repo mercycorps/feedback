@@ -90,7 +90,7 @@
 {
     "fields": {
         "updated": null,
-        "tag": "purchase request",
+        "tag": "exporting",
         "updated_by": null,
         "created_by": 1,
         "created": "2016-01-04T22:15:26.315Z"
@@ -101,7 +101,7 @@
 {
     "fields": {
         "updated": null,
-        "tag": "form entry",
+        "tag": "filtering",
         "updated_by": null,
         "created_by": 1,
         "created": "2016-01-04T22:15:31.494Z"
@@ -112,23 +112,12 @@
 {
     "fields": {
         "updated": null,
-        "tag": "loading time",
+        "tag": "loading",
         "updated_by": null,
         "created_by": 1,
         "created": "2016-01-04T22:15:42.212Z"
     },
     "model": "feedback.tag",
     "pk": 3
-},
-{
-    "fields": {
-        "updated": null,
-        "tag": "printing",
-        "updated_by": null,
-        "created_by": 1,
-        "created": "2016-01-04T22:15:46.806Z"
-    },
-    "model": "feedback.tag",
-    "pk": 4
 }
 ]
