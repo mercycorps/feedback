@@ -86,7 +86,17 @@
 
         </div>
     </div>
-    
+
+    <!-- Placeholder for modal popup windows -->
+    <div class="modal fade" id="feedback_app_modal" tabindex="-1" role="dialog" aria-labelledby="feedback_app_modal_label" aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content" id="feedback_app_modal_content_div"> 
+                <!-- form will be inserted here -->
+            </div> <!-- END modal-content -->
+        </div><!-- END modal-dialog -->
+    </div> <!-- END modal fade -->
+
+
 {% endblock content %}
 
 
@@ -94,6 +104,21 @@
     <!--<script type="text/javascript" src="{% static 'feedback/js/app_feedback.js' %}"></script>-->
     <script type = "text/javascript">
     "use strict";
+
+    /*
+     * Returns params in the URL.
+     */
+    function getUrlVars() {
+        var vars = [], hash;
+        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        for(var i = 0; i < hashes.length; i++)
+        {
+            hash = hashes[i].split('=');
+            vars.push(hash[0]);
+            vars[hash[0]] = hash[1];
+        }
+        return vars;
+    }
 
     $(document).ready(function() { 
         //initialize all tooltips.
@@ -118,8 +143,8 @@
     });
     $('body').on('click', 'a#id_add_feedback_link', function(e) {
         e.preventDefault();
-        $("#app_modal_div_content_div").load($(this).attr("href"));
-        $('#app_modal_div').modal('show');
+        $("#feedback_app_modal_content_div").load($(this).attr("href"));
+        $('#feedback_app_modal').modal('show');
     });
     </script>
     {% block feedback_extra_js %}
