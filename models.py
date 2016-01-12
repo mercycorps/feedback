@@ -153,7 +153,7 @@ class FeedbackVotesByUser(CommonBaseAbstractModel):
 
 class Attachment(CommonBaseAbstractModel):
     feedback = models.ForeignKey(Feedback, related_name='attachments', on_delete=models.CASCADE)
-    attachment = models.FileField(upload_to='uploads/issues/%Y/%m/%d/', help_text="You may attach a file or screenshot if it helps to explain this issue better.")
+    attachment = models.FileField(upload_to='uploads/issues/%Y/%m/%d/', blank=True, help_text="You may attach a file or screenshot if it helps to explain this issue better.")
 
     def get_absolute_url(self):
         """
