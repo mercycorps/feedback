@@ -12,7 +12,7 @@ from .models import Feedback, IssueType, IssueStatus, Tag
 class FeedbackMixin(object):
     @method_decorator(never_cache)
     def dispatch(self, *args, **kwargs):
-        return super(FeedbackDetailView, self).dispatch(*args, **kwargs)
+        return super(FeedbackMixin, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(FeedbackMixin, self).get_context_data(**kwargs)
