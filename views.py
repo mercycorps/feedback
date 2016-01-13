@@ -66,8 +66,10 @@ class FeedbackCreateView(SuccessMessageMixin, FeedbackMixin, CreateView):
                 tag, created = Tag.objects.get_or_create(tag=tag_id, defaults={'created': self.request.user.userprofile})
             self.object.tags.add(tag)
         attachment_formset = AttachmentFormSet(self.request.POST, self.request.FILES, instance=self.object)
-        if attachment_formset.is_valid():
-            attachment_formset.save()
+
+        if self.request.FILES:
+            if attachment_formset.is_valid():
+                attachment_formset.save()
         return super(FeedbackCreateView, self).form_valid(form)
 
 
