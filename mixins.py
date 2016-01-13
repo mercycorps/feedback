@@ -3,9 +3,17 @@ import datetime
 import random
 from django.conf import settings
 from django.db.models import Count, F
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
+from django.views.decorators.cache import cache_control
+
 from .models import Feedback, IssueType, IssueStatus, Tag
 
 class FeedbackMixin(object):
+    @method_decorator(never_cache)
+    def dispatch(self, *args, **kwargs):
+        return super(FeedbackDetailView, self).dispatch(*args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super(FeedbackMixin, self).get_context_data(**kwargs)
         context['my_issues_count'] = Feedback.objects.filter(created_by=self.request.user.userprofile).count()
