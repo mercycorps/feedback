@@ -42,6 +42,12 @@
             </ul>
 
             <div class="list-group">
+                <span href="#" class="list-group-item list-group-item-info"><strong>Sort By</strong></span>
+                <a href="{% url 'feedback_list' %}?sort=votes_up" class="list-group-item">Most Up Votes</a>
+                <a href="{% url 'feedback_list' %}" class="list-group-item">Clear Filter and Sort</a>
+            </div>
+
+            <div class="list-group">
                 <span href="#" class="list-group-item list-group-item-info"><strong>Issues by Year/Month</strong></span>
                 <ul class="list-group">
                 {% for year, months in archive_data.items %}

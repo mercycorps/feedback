@@ -4,7 +4,7 @@ from .views import *
 
 
 urlpatterns = [
-    url(r'^$', FeedbackArchiveIndexView.as_view(), name='feedback_list'),
+    url(r'^$', FeedbackListView.as_view(), name='feedback_list'),
     url(r'^add/$', FeedbackCreateView.as_view(), name='feedback_add'),
     #url(r'^pr/edit/(?P<pk>\d+)/$', PurchaseRequestUpdateView.as_view(), name='pr_edit'),
     url(r'^(?P<pk>\d+)/$', FeedbackDetailView.as_view(), name='feedback_view'),

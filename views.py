@@ -33,8 +33,12 @@ class FeedbackListView(FeedbackMixin, ListView):
         # 1. create fulltext index summary_index on feedback_feedback(summary);
         # 2. create fulltext index description_index on feedback_feedback(description)
         args = ( Q( summary__search = search ) | Q( description__search = search ), )
+        sortby = self.request.GET.get("sort", None)
+        if sortby is None:
+            sortby = "created"
+
         kwargs = prepare_query_params(self.request.GET)
-        qs = Feedback.objects.filter(*args if search else (), **kwargs)
+        qs = Feedback.objects.filter(*args if search else (), **kwargs).order_by("-" + sortby)
         return qs
 
 
@@ -86,6 +90,7 @@ class FeedbackDetailView(FeedbackMixin, DetailView):
 class FeedbackArchiveIndexView(FeedbackMixin, ArchiveIndexView):
     """
     A list view showing the "latest" objects, by created date.
+    TODO: DELETE THIS VIEW NOT USED
     """
     queryset = Feedback.objects.all()
     date_field = "created"
