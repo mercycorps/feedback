@@ -67,6 +67,7 @@ class FeedbackCreateView(SuccessMessageMixin, FeedbackMixin, CreateView):
                 tag_id = int(tag_id)
                 tag = Tag.objects.get(pk=tag_id)
             except ValueError:
+                if tag_id == "" or tag_id == " " or tag_id == None: continue
                 tag, created = Tag.objects.get_or_create(tag=tag_id, defaults={'created': self.request.user.userprofile})
             self.object.tags.add(tag)
         attachment_formset = AttachmentFormSet(self.request.POST, self.request.FILES, instance=self.object)
