@@ -39,6 +39,9 @@ class FeedbackListView(FeedbackMixin, ListView):
 
         kwargs = prepare_query_params(self.request.GET)
         qs = Feedback.objects.filter(*args if search else (), **kwargs).order_by("-" + sortby)
+        if 'status' not in kwargs:
+            qs = qs.exclude(status__status='Closed')
+
         return qs
 
 
