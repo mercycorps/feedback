@@ -53,6 +53,8 @@ def smart_list(value, delimiter=",", func=None):
             l = value.split(delimiter)
     elif isinstance(value, int):
         l = [value]
+    elif isinstance(value, long):
+        l = [int(value)]
     else:
         raise ValueError(u"Unparseable smart_list value: %s" % value)
 

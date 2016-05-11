@@ -1,4 +1,5 @@
 import operator
+from django.core.mail import send_mail
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.db.models import Q
@@ -8,6 +9,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.forms import inlineformset_factory
 from django.utils import timezone
+from django.conf import settings
 
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
@@ -78,6 +80,7 @@ class FeedbackCreateView(SuccessMessageMixin, FeedbackMixin, CreateView):
         if self.request.FILES:
             if attachment_formset.is_valid():
                 attachment_formset.save()
+        send_mail(subject=self.object.summary, message=self.object.description, from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[settings.APP_CONTACT_PERSON], fail_silently=False)
         return super(FeedbackCreateView, self).form_valid(form)
 
 
@@ -87,7 +90,7 @@ class FeedbackDetailView(FeedbackMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(FeedbackDetailView, self).get_context_data(**kwargs)
-        context['comment_tree'] = Comment.objects.filter(feedback=self.object.pk).order_by('-path')
+        context['comment_tree'] = Comment.objects.filter(feedback=self.object.pk).order_by('path')
         context['form'] = CommentForm(initial={'feedback': self.object})
         return context
 
@@ -141,21 +144,31 @@ class CommentCreateView(FeedbackMixin, CreateView):
         parent = form['parent'].value()
         if parent == '':
             #Set a blank path then save it to get an ID
-            temp.path = []
+            temp.path = ""
             temp.save()
-            temp.path = [temp.id]
+            temp.path = temp.id
         else:
             #Get the parent node
             node = Comment.objects.get(id=parent)
             temp.depth = node.depth + 1
-            temp.path = eval(str(node.path))
+            #temp.path = eval(str(node.path))
+            temp.path = node.path
 
-            #Store parents path then apply comment ID
+            #save the comment to be able to get its ID
             temp.save()
-            temp.path.append(temp.id)
+
+            #temp.path.append(temp.id)
+            temp.path = "%s, %s" % (temp.path, temp.id)
+
         #Final save for parents and children
         temp.save()
+        recipients = [settings.APP_CONTACT_PERSON]
+        if node:
+            recipients.append(node.created_by.user.email)
+        else:
+            recipients.append(temp.feedback.created_by.user.email)
 
+        send_mail(subject=temp.feedback.summary, message=temp.content, from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=recipients, fail_silently=False)
         return super(CommentCreateView, self).form_valid(form)
 
 

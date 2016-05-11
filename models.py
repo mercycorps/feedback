@@ -113,6 +113,7 @@ class Comment(CommonBaseAbstractModel):
     feedback = models.ForeignKey(Feedback, related_name="comments", null=False, blank=False, on_delete=models.CASCADE)
     content = models.CharField(max_length=254, null=False, blank=False)
     path = models.CommaSeparatedIntegerField(max_length=250, null=False, blank=False, editable=False)
+    path_as_list = models.CommaSeparatedIntegerField(max_length=250, null=False, blank=False, editable=False)
     depth = models.PositiveIntegerField(default=0)
 
     def __unicode__(self):
@@ -130,7 +131,7 @@ class Comment(CommonBaseAbstractModel):
         # in this case just cast it to an integer, ensuring that
         # we get a list of ints back out
         func = lambda x: int(x)
-        self.path = smart_list(self.path, func=func)
+        self.path_as_list = smart_list(self.path, func=func)
 
     def get_absolute_url(self):
         """
