@@ -143,10 +143,17 @@
         var key = e.keyCode || e.which;
         if (key === 13) {
             var url = `{% url "feedback_filter" %}`;
-            console.log(url +"?search=" + $(this).val());
+            //console.log(url +"?search=" + $(this).val());
             window.location.href = url +"?search=" + $(this).val();;
         }
     });
+    $("body").on("click", "#search_btn", function(e) {
+        var url = `{% url "feedback_filter" %}`;
+        var search_val = $("input#search").val();
+        window.location.href = url +"?search=" + search_val;
+    });
+
+
     $('body').on('click', 'a#id_add_feedback_link', function(e) {
         e.preventDefault();
         $("#feedback_app_modal_content_div").load($(this).attr("href"));
