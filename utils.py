@@ -1,3 +1,5 @@
+from django.contrib.auth.models import User, Group
+
 
 def prepare_query_params(params):
     kwargs = {}
@@ -63,3 +65,8 @@ def smart_list(value, delimiter=",", func=None):
         return [func(e) for e in l]
     except Exception as ex:
         raise ValueError(u"Unable to parse value '%s': %s" % (value, ex))
+
+def get_moderators():
+    moderators = map(str, User.objects.filter(groups__name="moderator").values_list("email", flat=True))
+    return moderators
+

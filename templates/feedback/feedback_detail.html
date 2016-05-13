@@ -15,9 +15,16 @@
 {% endblock %}
 
 {% block feedback_content %}
-
+    {{baseurl}}
     <blockquote class="issue" style="font-size: 14px;">
-        <h4>{{ feedback.summary }}</h4>
+        <h4>{{ feedback.summary }} 
+        {% if request.user|is_member:"moderator"%} 
+            {% if feedback.status.status == "Closed" %}
+                <a id="close_issue_btn" href="/feedback/api/v1/feedbacks/{{feedback.id}}/" class="btn btn-success pull-right">Re-open</a>
+            {% else %}
+                <a id="close_issue_btn" href="/feedback/api/v1/feedbacks/{{feedback.id}}/" class="btn btn-danger pull-right">Close</a>
+            {% endif %}
+        {% endif %}</h4>
         <p>{{ feedback.description }}</p>
         {% if feedback.reference %}
             <div class="alert alert-info" role="alert" style="font-size: 75%;"><strong>Reference </strong> <a href="{{ feedback.reference }}" target="_blank"> {{ feedback.reference }}</a></div>
@@ -65,6 +72,25 @@
 <script type = "text/javascript">
     "use strict";
 
+    $("blockquote").on("click", "#close_issue_btn", function(e) {
+        e.preventDefault();
+        var api_url = $(this).attr('href');
+        var data;
+        if ($(this).text() == "Close") {
+            data = {"status": 3}; //3 = Closed
+        } else {
+            data = {"status": 1}; // 1 = Open
+        }
+        $.ajax({
+            url: api_url,
+            type: "PATCH",
+            data: data,
+            success: function(data, textStatus, jqXHR) {
+                location.reload();
+            }
+        });
+        
+    });
     // Any time someone clicks on the vote up link, vote it up.
     $('blockquote').on('click', '#vote_up_link', function(e) {
         e.preventDefault();

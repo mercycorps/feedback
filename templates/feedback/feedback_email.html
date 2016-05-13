@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+{% if feedback %} 
+    <h3>{{url}}</h3>
+    <p>
+        {{ feedback.created_by.name }} reported <a href="{{url}}" target="_blank">{{ feedback.issue_type.issue_type }}</a>
+    </p>
+    <p> {{ feedback.description }} </p>
+{% else %}
+    <p>
+        {{ comment.created_by.name }} commented on <b>{{ comment.feedback.summary }}</b>; <a href="{{url}}" target="_blank"> reply </a>
+    </p>
+    <p>{{ comment.content }}</p>
+{% endif %}
+
+</html>

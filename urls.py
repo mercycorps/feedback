@@ -1,9 +1,15 @@
 from django.conf.urls import include, url
+from rest_framework import routers
 from rest_framework.urlpatterns import format_suffix_patterns
 from .views import *
+from feedback import api_views
 
+router = routers.DefaultRouter()
+router.register(r'feedbacks', api_views.FeedbackViewSet, base_name="fb")
 
 urlpatterns = [
+    url(r'^api/v1/', include(router.urls)),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^$', FeedbackListView.as_view(), name='feedback_list'),
     url(r'^add/$', FeedbackCreateView.as_view(), name='feedback_add'),
     #url(r'^pr/edit/(?P<pk>\d+)/$', PurchaseRequestUpdateView.as_view(), name='pr_edit'),
@@ -19,4 +25,5 @@ urlpatterns = [
     url(r'^comment/add/$', CommentCreateView.as_view(), name='comment_add'),
 ]
 
-urlpatterns = format_suffix_patterns(urlpatterns)
+# no need to call this again since DefaultRouter calls format_suffix_patterns
+#urlpatterns = format_suffix_patterns(urlpatterns)

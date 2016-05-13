@@ -1,4 +1,5 @@
 import operator
+from django.core.urlresolvers import reverse_lazy
 from django.core.mail import send_mail
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -17,7 +18,7 @@ from django.contrib import messages
 from .models import Feedback, FeedbackVotesByUser, Comment, Tag, IssueStatus, Attachment
 from .forms import FeedbackForm, CommentForm, AttachmentFormSet, AttachmentFormSetHelper
 from .mixins import FeedbackMixin
-from .utils import prepare_query_params
+from .utils import prepare_query_params, get_moderators
 
 
 
@@ -46,6 +47,15 @@ class FeedbackListView(FeedbackMixin, ListView):
 
         return qs
 
+
+# get_template is what we need for loading up the template for parsing.
+from django.template.loader import get_template
+from django.core.mail import EmailMultiAlternatives
+
+# Templates in Django need a "Context" to parse with, so we'll borrow this.
+# "Context"'s are really nothing more than a generic dict wrapped up in a
+# neat little function call.
+from django.template import Context
 
 class FeedbackCreateView(SuccessMessageMixin, FeedbackMixin, CreateView):
     model = Feedback
@@ -80,7 +90,36 @@ class FeedbackCreateView(SuccessMessageMixin, FeedbackMixin, CreateView):
         if self.request.FILES:
             if attachment_formset.is_valid():
                 attachment_formset.save()
-        send_mail(subject=self.object.summary, message=self.object.description, from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[settings.APP_CONTACT_PERSON], fail_silently=False)
+
+        """
+        msg = EmailMultiAlternatives(self.object.summary,
+            self.object.description,
+            settings.DEFAULT_FROM_EMAIL,
+            get_moderators(),
+            )
+        html_content = get_template('feedback/feedback_email.html').render(
+                        Context({
+                            'feedback': self.object,
+                        })
+                    )
+        msg.attach_alternative(html_content, "text/html")
+        msg.send(fail_silently=False)
+        """
+
+        content = get_template('feedback/feedback_email.html').render(
+            Context({
+                'feedback': self.object,
+                'url': "%s%s" % (self.request.build_absolute_uri("/").rstrip("/"), reverse_lazy("feedback_view", kwargs={"pk": self.object.pk}))
+            })
+        )
+        send_mail(subject=self.object.summary,
+                    #message=self.object.description,
+                    message = content,
+                    from_email= settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=get_moderators(),
+                    fail_silently=False,
+                    html_message=content)
+
         return super(FeedbackCreateView, self).form_valid(form)
 
 
@@ -142,14 +181,17 @@ class CommentCreateView(FeedbackMixin, CreateView):
         form.instance.created_by = self.request.user.userprofile
         temp = form.save(commit=False)
         parent = form['parent'].value()
+        recipients = get_moderators()
         if parent == '':
             #Set a blank path then save it to get an ID
             temp.path = ""
             temp.save()
             temp.path = temp.id
+            recipients.append(temp.feedback.created_by.user.email)
         else:
             #Get the parent node
             node = Comment.objects.get(id=parent)
+            recipients.append(node.created_by.user.email)
             temp.depth = node.depth + 1
             #temp.path = eval(str(node.path))
             temp.path = node.path
@@ -162,13 +204,19 @@ class CommentCreateView(FeedbackMixin, CreateView):
 
         #Final save for parents and children
         temp.save()
-        recipients = [settings.APP_CONTACT_PERSON]
-        if node:
-            recipients.append(node.created_by.user.email)
-        else:
-            recipients.append(temp.feedback.created_by.user.email)
 
-        send_mail(subject=temp.feedback.summary, message=temp.content, from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=recipients, fail_silently=False)
+        content = get_template('feedback/feedback_email.html').render(
+            Context({
+                'comment': temp,
+                'url': "%s%s" % (self.request.build_absolute_uri("/").rstrip("/"), reverse_lazy("feedback_view", kwargs={"pk": temp.feedback.pk}))
+            })
+        )
+        send_mail(subject=temp.feedback.summary,
+                    message = content,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=recipients,
+                    fail_silently=False,
+                    html_message=content)
         return super(CommentCreateView, self).form_valid(form)
 
 
