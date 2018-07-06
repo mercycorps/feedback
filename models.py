@@ -173,9 +173,11 @@ class Notification(CommonBaseAbstractModel):
     icon = models.CharField(max_length=20, null=False, blank=False, default="info")
     seen = models.BooleanField(default=False, null=False, blank=False)
     seen_date = models.DateField(blank=True, null=True)
-    expiration_date = models.DateField(default=date.today()+timedelta(days=30))
+    expiration_date = models.DateField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
+        if not self.expiration_date:
+            self.expiration_date = date.today()+timedelta(days=30)
         notifications = Notification.objects.filter(expiration_date__lte=date.today())
         if notifications.count() > 30:
             for n in notifications:

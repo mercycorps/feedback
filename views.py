@@ -52,11 +52,6 @@ class FeedbackListView(FeedbackMixin, ListView):
 from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
 
-# Templates in Django need a "Context" to parse with, so we'll borrow this.
-# "Context"'s are really nothing more than a generic dict wrapped up in a
-# neat little function call.
-from django.template import Context
-
 class FeedbackCreateView(SuccessMessageMixin, FeedbackMixin, CreateView):
     model = Feedback
     form_class = FeedbackForm
@@ -106,12 +101,12 @@ class FeedbackCreateView(SuccessMessageMixin, FeedbackMixin, CreateView):
         msg.send(fail_silently=False)
         """
 
-        content = get_template('feedback/feedback_email.html').render(
-            Context({
+        content = get_template('feedback/feedback_email.html').render({
                 'feedback': self.object,
-                'url': "%s%s" % (self.request.build_absolute_uri("/").rstrip("/"), reverse_lazy("feedback_view", kwargs={"pk": self.object.pk}))
-            })
-        )
+                'url': "%s%s" % (
+                    self.request.build_absolute_uri("/").rstrip("/"), reverse_lazy("feedback_view", kwargs={"pk": self.object.pk})
+                )})
+
         send_mail(subject=self.object.summary,
                     #message=self.object.description,
                     message = content,
@@ -205,18 +200,21 @@ class CommentCreateView(FeedbackMixin, CreateView):
         #Final save for parents and children
         temp.save()
 
-        content = get_template('feedback/feedback_email.html').render(
-            Context({
-                'comment': temp,
-                'url': "%s%s" % (self.request.build_absolute_uri("/").rstrip("/"), reverse_lazy("feedback_view", kwargs={"pk": temp.feedback.pk}))
-            })
-        )
+        content = get_template('feedback/feedback_email.html').render({
+            'comment': temp,
+            'url': "%s%s" % (
+                self.request.build_absolute_uri("/").rstrip("/"),
+                reverse_lazy("feedback_view", kwargs={"pk": temp.feedback.pk}))
+        })
+
+
         send_mail(subject=temp.feedback.summary,
                     message = content,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=recipients,
                     fail_silently=False,
                     html_message=content)
+
         return super(CommentCreateView, self).form_valid(form)
 
 
